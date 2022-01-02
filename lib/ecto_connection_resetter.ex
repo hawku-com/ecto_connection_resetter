@@ -34,10 +34,11 @@ defmodule EctoConnectionResetter do
 
   @impl true
   def handle_info(:work, state) do
-    %{pid: pid, meta: _meta, cache: _cache} =
-      Ecto.Adapter.lookup_meta(state[:repo])
+    %{pid: pid} = Ecto.Adapter.lookup_meta(state[:repo])
 
-    DBConnection.disconnect_all(pid, state[:close_interval], pool: state[:pool])
+    DBConnection.disconnect_all(pid, state[:close_interval],
+      pool: state[:pool] || DBConnection.ConnectionPool
+    )
 
     schedule_work(state[:cycle_mins])
 
