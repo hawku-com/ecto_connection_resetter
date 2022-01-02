@@ -26,13 +26,15 @@ defmodule EctoConnectionResetter.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:ecto, :logger]
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:db_connection, "~> 2.4.1"},
+      {:ecto_sql, "~> 3.4"},
       {:credo, "~> 1.6.1", only: [:dev, :test], runtime: false},
       {:dialyzex, "~> 1.3.0", only: [:dev], runtime: false}
     ]
