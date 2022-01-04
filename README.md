@@ -33,7 +33,7 @@ by adding `ecto_connection_resetter` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ecto_connection_resetter, "~> 0.1.0"}
+    {:ecto_connection_resetter, "~> 0.1.1"}
   ]
 end
 ```
