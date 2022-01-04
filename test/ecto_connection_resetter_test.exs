@@ -20,6 +20,10 @@ defmodule EctoConnectionResetterTest do
                  pool: TestPool
                })
     end
+
+    test "fails to successfully init EctoConnectionResetter" do
+      assert {:error, :missing_params} == EctoConnectionResetter.init(%{})
+    end
   end
 
   describe "start_link/1" do

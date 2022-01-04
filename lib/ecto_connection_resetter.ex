@@ -49,7 +49,7 @@ defmodule EctoConnectionResetter do
   # Callbacks
 
   @impl true
-  def init(args) do
+  def init(%ECR{} = args) do
     schedule_work(args.cycle_mins)
 
     {:ok, args}
@@ -59,6 +59,16 @@ defmodule EctoConnectionResetter do
       Logger.warn(e)
       Logger.warn("EctoConnectionResetter failed << ")
       {:ok, args}
+  end
+
+  def init(_args) do
+    throw("You need cycle_mins, repo and close_interval parameters")
+  catch
+    message ->
+      Logger.warn("EctoConnectionResetter failed >> ")
+      Logger.warn(message)
+      Logger.warn("EctoConnectionResetter failed << ")
+      {:error, :missing_params}
   end
 
   @impl true
@@ -81,6 +91,6 @@ defmodule EctoConnectionResetter do
   end
 
   defp schedule_work(cycle_mins) do
-    Process.send_after(self(), :work, cycle_mins * 1000)
+    Process.send_after(self(), :work, cycle_mins * 60 * 1000)
   end
 end
