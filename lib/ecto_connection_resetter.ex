@@ -1,5 +1,19 @@
 defmodule EctoConnectionResetter do
-  @moduledoc "Ecto Connection Resetter"
+  require Logger
+
+  @moduledoc """
+  Defines EctoConnectionResetter
+
+  An OTP process that allows a user to add one line to create a cron job to call disconnect all every X minutes.
+
+  In order to use it, update your `application.ex` with:
+
+    def start(_type, _args) do
+      children = [
+        {EctoConnectionResetter, %{cycle_mins: 1, close_interval: 1, repo: YourRepo}}
+      ]
+    end
+  """
 
   use GenServer
 
@@ -12,13 +26,22 @@ defmodule EctoConnectionResetter do
   @type close_interval :: integer
 
   @typedoc "Repo that will be cycled"
-  @type repo :: atom
+  @type repo :: Ecto.Repo.t()
 
-  @type state :: map
+  @type t :: %ECR{
+          cycle_mins: cycle_mins,
+          close_interval: close_interval,
+          repo: repo,
+          pool: module | nil
+        }
+
+  @enforce_keys [:cycle_mins, :close_interval, :repo, :pool]
+
+  defstruct @enforce_keys
 
   # Client
 
-  @spec start_link(map()) :: :ignore | {:error, term()} | {:ok, pid()}
+  @spec start_link(ECR.t()) :: :ignore | {:error, term()} | {:ok, pid()}
   def start_link(args) do
     GenServer.start_link(ECR, args, name: ECR)
   end
@@ -27,22 +50,34 @@ defmodule EctoConnectionResetter do
 
   @impl true
   def init(args) do
-    schedule_work(args[:cycle_mins])
+    schedule_work(args.cycle_mins)
 
     {:ok, args}
+  rescue
+    e ->
+      Logger.warn("EctoConnectionResetter failed >> ")
+      Logger.warn(e)
+      Logger.warn("EctoConnectionResetter failed << ")
+      {:ok, args}
   end
 
   @impl true
   def handle_info(:work, state) do
-    %{pid: pid} = Ecto.Adapter.lookup_meta(state[:repo])
+    %{pid: pid} = Ecto.Adapter.lookup_meta(state.repo)
 
-    DBConnection.disconnect_all(pid, state[:close_interval],
+    DBConnection.disconnect_all(pid, state.close_interval,
       pool: state[:pool] || DBConnection.ConnectionPool
     )
 
-    schedule_work(state[:cycle_mins])
+    schedule_work(state.cycle_mins)
 
     {:noreply, state}
+  rescue
+    e ->
+      Logger.warn("EctoConnectionResetter failed >> ")
+      Logger.warn(e)
+      Logger.warn("EctoConnectionResetter failed << ")
+      {:noreply, state}
   end
 
   defp schedule_work(cycle_mins) do
