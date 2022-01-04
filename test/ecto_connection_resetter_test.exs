@@ -7,13 +7,13 @@ defmodule EctoConnectionResetterTest do
   describe "init/1" do
     test "inits EctoConnectionResetter" do
       assert {:ok,
-              %EctoConnectionResetter{
+              %{
                 cycle_mins: 1,
                 close_interval: 1,
                 repo: TestRepo,
                 pool: TestPool
               }} ==
-               EctoConnectionResetter.init(%EctoConnectionResetter{
+               EctoConnectionResetter.init(%{
                  cycle_mins: 1,
                  close_interval: 1,
                  repo: TestRepo,
@@ -29,7 +29,7 @@ defmodule EctoConnectionResetterTest do
   describe "start_link/1" do
     test "accepts params" do
       assert {:ok, _pid} =
-               EctoConnectionResetter.start_link(%EctoConnectionResetter{
+               EctoConnectionResetter.start_link(%{
                  cycle_mins: 1,
                  close_interval: 1,
                  repo: TestRepo,

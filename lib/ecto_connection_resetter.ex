@@ -28,20 +28,13 @@ defmodule EctoConnectionResetter do
   @typedoc "Repo that will be cycled"
   @type repo :: Ecto.Repo.t()
 
-  @type t :: %ECR{
-          cycle_mins: cycle_mins,
-          close_interval: close_interval,
-          repo: repo,
-          pool: module | nil
-        }
-
   @enforce_keys [:cycle_mins, :close_interval, :repo, :pool]
 
   defstruct @enforce_keys
 
   # Client
 
-  @spec start_link(ECR.t()) :: :ignore | {:error, term()} | {:ok, pid()}
+  @spec start_link(map()) :: :ignore | {:error, term()} | {:ok, pid()}
   def start_link(args) do
     GenServer.start_link(ECR, args, name: ECR)
   end
@@ -49,7 +42,7 @@ defmodule EctoConnectionResetter do
   # Callbacks
 
   @impl true
-  def init(%ECR{} = args) do
+  def init(%{cycle_mins: _cycle_mins, close_interval: _close_interval, repo: _repo} = args) do
     schedule_work(args.cycle_mins)
 
     {:ok, args}
