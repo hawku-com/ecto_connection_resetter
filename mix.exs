@@ -51,7 +51,7 @@ defmodule EctoConnectionResetter.MixProject do
       ],
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/thelastinuit/ecto_connection_resetter"
+        "GitHub" => "https://github.com/hawku-com/ecto_connection_resetter"
       }
     ]
   end
