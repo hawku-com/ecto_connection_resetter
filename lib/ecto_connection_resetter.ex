@@ -1,6 +1,4 @@
 defmodule EctoConnectionResetter do
-  require Logger
-
   @moduledoc """
   Defines EctoConnectionResetter
 
@@ -17,16 +15,24 @@ defmodule EctoConnectionResetter do
 
   use GenServer
 
+  require Logger
+
   alias __MODULE__, as: ECR
 
   @typedoc "Number of minutes between each cycle"
-  @type cycle_mins :: integer
+  @type cycle_mins :: integer()
 
   @typedoc "Seconds to close once a disconnect_all is called"
-  @type close_interval :: integer
+  @type close_interval :: integer()
 
   @typedoc "Repo that will be cycled"
   @type repo :: Ecto.Repo.t()
+
+  @typedoc "Should it log additional information?"
+  @type verbose :: boolean()
+
+  @typedoc "Function to be called after requesting the connection reset"
+  @type reset_callback :: function()
 
   @enforce_keys [:cycle_mins, :close_interval, :repo, :pool]
 
@@ -36,6 +42,7 @@ defmodule EctoConnectionResetter do
 
   @spec start_link(map()) :: :ignore | {:error, term()} | {:ok, pid()}
   def start_link(args) do
+    maybe_log_info("EctoConnectionResetter: starting process...", args)
     GenServer.start_link(ECR, args, name: ECR)
   end
 
@@ -43,8 +50,7 @@ defmodule EctoConnectionResetter do
 
   @impl true
   def init(%{cycle_mins: _cycle_mins, close_interval: _close_interval, repo: _repo} = args) do
-    schedule_work(args.cycle_mins)
-
+    schedule_work(args)
     {:ok, args}
   rescue
     e ->
@@ -67,13 +73,16 @@ defmodule EctoConnectionResetter do
   @impl true
   def handle_info(:work, state) do
     %{pid: pid} = Ecto.Adapter.lookup_meta(state.repo)
+    maybe_log_info("EctoConnectionResetter: reseting connections in the pool...", state)
 
     DBConnection.disconnect_all(pid, state.close_interval,
       pool: state[:pool] || DBConnection.ConnectionPool
     )
 
-    schedule_work(state.cycle_mins)
+    if Map.get(state, :reset_callback, nil),
+      do: state.reset_callback.(state)
 
+    schedule_work(state)
     {:noreply, state}
   rescue
     e ->
@@ -83,7 +92,17 @@ defmodule EctoConnectionResetter do
       {:noreply, state}
   end
 
-  defp schedule_work(cycle_mins) do
-    Process.send_after(self(), :work, cycle_mins * 60 * 1000)
+  defp schedule_work(%{cycle_mins: cycle_mins} = state) do
+    cycle = cycle_mins * 60 * 1000
+    next_schedule = DateTime.utc_now() |> DateTime.add(cycle, :millisecond)
+    maybe_log_info("EctoConnectionResetter: next reset scheduled for #{next_schedule} (UTC)", state)
+    Process.send_after(self(), :work, cycle)
   end
+
+  defp maybe_log_info(message, %{verbose: true}),
+    do: Logger.info(message)
+
+  defp maybe_log_info(_message, _args),
+    do: nil
 end
+
