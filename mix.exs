@@ -5,7 +5,7 @@ defmodule EctoConnectionResetter.MixProject do
     [
       app: :ecto_connection_resetter,
       version: "0.1.1",
-      elixir: "~> 1.13",
+      elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: [
