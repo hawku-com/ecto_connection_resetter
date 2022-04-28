@@ -25,7 +25,7 @@ where:
 - `close_interval`: seconds to close once a disconnect_all is called;
 - `repo`: your Repo;
 - `verbose`: (optional) log additional text when spawning the lib's OTP process and when scheduling the next resetting. Default is false;
-- `reset_callback`: (optional) function to be called every time connections are resetted in the pool (e.g. useful for APM metrics).
+- `reset_callback`: (optional) function to be called every time connections are reset in the pool (e.g. useful for APM metrics).
 
 ## Installation
 
