@@ -17,9 +17,7 @@ defmodule TestPool do
 end
 
 defmodule TestDatabaseObserver do
-  def db_connection_reset_callback(_state) do
-    IO.puts("Callback: track connection reset on APM")
-  end
+  def db_connection_reset_callback(_state), do: :ok
 end
 
 {:ok, _pid} = TestRepo.start_link()
