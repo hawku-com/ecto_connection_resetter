@@ -38,7 +38,8 @@ defmodule EctoConnectionResetter.MixProject do
       {:db_connection, "~> 2.4.1"},
       {:ecto_sql, "~> 3.4"},
       {:credo, "~> 1.6.1", only: [:dev, :test], runtime: false},
-      {:dialyzex, "~> 1.3.0", only: [:dev], runtime: false}
+      {:dialyzex, "~> 1.3.0", only: [:dev], runtime: false},
+      {:mock, "~> 0.3.0", only: :test}
     ]
   end
 

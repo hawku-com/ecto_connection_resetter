@@ -16,6 +16,12 @@ defmodule TestPool do
   def pool_type, do: DBConnection.ConnectionPool
 end
 
+defmodule TestDatabaseObserver do
+  def db_connection_reset_callback(_state) do
+    IO.puts("Callback: track connection reset on APM")
+  end
+end
+
 {:ok, _pid} = TestRepo.start_link()
 
 ExUnit.start()

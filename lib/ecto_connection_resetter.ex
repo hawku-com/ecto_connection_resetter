@@ -49,7 +49,10 @@ defmodule EctoConnectionResetter do
   # Callbacks
 
   @impl true
-  def init(%{cycle_mins: _cycle_mins, close_interval: _close_interval, repo: _repo} = args) do
+  def init(
+        %{cycle_mins: _cycle_mins, close_interval: _close_interval, repo: _repo} =
+          args
+      ) do
     schedule_work(args)
     {:ok, args}
   rescue
@@ -73,7 +76,11 @@ defmodule EctoConnectionResetter do
   @impl true
   def handle_info(:work, state) do
     %{pid: pid} = Ecto.Adapter.lookup_meta(state.repo)
-    maybe_log_info("EctoConnectionResetter: reseting connections in the pool...", state)
+
+    maybe_log_info(
+      "EctoConnectionResetter: reseting connections in the pool...",
+      state
+    )
 
     DBConnection.disconnect_all(pid, state.close_interval,
       pool: state[:pool] || DBConnection.ConnectionPool
@@ -95,7 +102,12 @@ defmodule EctoConnectionResetter do
   defp schedule_work(%{cycle_mins: cycle_mins} = state) do
     cycle = cycle_mins * 60 * 1000
     next_schedule = DateTime.utc_now() |> DateTime.add(cycle, :millisecond)
-    maybe_log_info("EctoConnectionResetter: next reset scheduled for #{next_schedule} (UTC)", state)
+
+    maybe_log_info(
+      "EctoConnectionResetter: next reset scheduled for #{next_schedule} (UTC)",
+      state
+    )
+
     Process.send_after(self(), :work, cycle)
   end
 
@@ -105,4 +117,3 @@ defmodule EctoConnectionResetter do
   defp maybe_log_info(_message, _args),
     do: nil
 end
-
