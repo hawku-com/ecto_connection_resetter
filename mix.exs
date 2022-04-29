@@ -5,7 +5,7 @@ defmodule EctoConnectionResetter.MixProject do
     [
       app: :ecto_connection_resetter,
       version: "0.1.1",
-      elixir: "~> 1.13",
+      elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: [
@@ -38,7 +38,8 @@ defmodule EctoConnectionResetter.MixProject do
       {:db_connection, "~> 2.4.1"},
       {:ecto_sql, "~> 3.4"},
       {:credo, "~> 1.6.1", only: [:dev, :test], runtime: false},
-      {:dialyzex, "~> 1.3.0", only: [:dev], runtime: false}
+      {:dialyzex, "~> 1.3.0", only: [:dev], runtime: false},
+      {:mock, "~> 0.3.0", only: :test}
     ]
   end
 

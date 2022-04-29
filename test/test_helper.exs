@@ -16,6 +16,10 @@ defmodule TestPool do
   def pool_type, do: DBConnection.ConnectionPool
 end
 
+defmodule TestDatabaseObserver do
+  def db_connection_reset_callback(_state), do: :ok
+end
+
 {:ok, _pid} = TestRepo.start_link()
 
 ExUnit.start()
