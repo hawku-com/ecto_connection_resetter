@@ -34,7 +34,12 @@ defmodule EctoConnectionResetter do
   @typedoc "Function to be called after requesting the connection reset"
   @type reset_callback :: function()
 
+  @typedoc "name to pass to `GenServer.start_link` when initializing the application"
+  @type name :: atom()
+
   @enforce_keys [:cycle_mins, :close_interval, :repo, :pool]
+
+  @default_process_name ECR
 
   defstruct @enforce_keys
 
@@ -43,7 +48,8 @@ defmodule EctoConnectionResetter do
   @spec start_link(map()) :: :ignore | {:error, term()} | {:ok, pid()}
   def start_link(args) do
     maybe_log_info("EctoConnectionResetter: starting process...", args)
-    GenServer.start_link(ECR, args, name: ECR)
+
+    GenServer.start_link(ECR, args, name: process_name(args))
   end
 
   # Callbacks
@@ -111,9 +117,14 @@ defmodule EctoConnectionResetter do
     Process.send_after(self(), :work, cycle)
   end
 
-  defp maybe_log_info(message, %{verbose: true}),
-    do: Logger.info(message)
+  defp maybe_log_info(message, %{verbose: true} = args) do
+    Logger.info("#{process_name(args)} *** #{message}")
+  end
 
   defp maybe_log_info(_message, _args),
     do: nil
+
+  defp process_name(%{name: process_name}), do: process_name
+
+  defp process_name(_args), do: @default_process_name
 end
