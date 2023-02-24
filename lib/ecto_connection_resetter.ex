@@ -22,8 +22,8 @@ defmodule EctoConnectionResetter do
   @typedoc "Number of minutes between each cycle"
   @type cycle_mins :: integer()
 
-  @typedoc "Seconds to close once a disconnect_all is called"
-  @type close_interval :: integer()
+  @typedoc "Milliseconds to close once a disconnect_all is called"
+  @type close_interval :: non_neg_integer()
 
   @typedoc "Repo that will be cycled"
   @type repo :: Ecto.Repo.t()
